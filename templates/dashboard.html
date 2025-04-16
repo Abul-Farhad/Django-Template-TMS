@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %} Dashboard Page {% endblock %}
+
+{% block content %}
+<div class="p-6">
+    <h1 class="text-3xl font-bold mb-6">Dashboard</h1>
+
+    <!-- Statistics Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Number of Users -->
+        <div class="bg-blue-500 text-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold">Number of Users</h2>
+            <p class="text-4xl font-bold mt-4">{{ users_count }}</p>
+        </div>
+
+        <!-- Number of Projects -->
+        <div class="bg-green-500 text-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold">Number of Projects</h2>
+            <p class="text-4xl font-bold mt-4">15</p> <!-- Dummy value -->
+        </div>
+
+        <!-- Number of Roles -->
+        <div class="bg-yellow-500 text-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-semibold">Number of Roles</h2>
+            <p class="text-4xl font-bold mt-4">5</p> <!-- Dummy value -->
+        </div>
+    </div>
+</div>
+{% endblock %}

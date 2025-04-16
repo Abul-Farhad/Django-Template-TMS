@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Main Content -->
+<div class="flex-1 p-6">
+    <h1 class="text-2xl font-bold mb-4">Users</h1>
+
+    <!-- Search Field -->
+    <form method="get" action="{% url 'users' %}" class="mb-4">
+        <input type="text" name="q" placeholder="Search by name"
+            class="w-full max-w-md px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
+            value="{{ request.GET.search|default:'' }}">
+        <button type="submit" class="mt-2 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">
+            Search
+        </button>
+    </form>
+
+    <!-- Users Table -->
+    <div class="overflow-x-auto bg-white rounded-lg shadow-md">
+        <table class="min-w-full border-collapse">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Name</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Email</th>
+                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Is Staff</th>
+                    <!-- <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Role</th> -->
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr class="border-t">
+                    <td class="px-4 py-2 text-sm text-gray-700">{{ user.name }}</td>
+                    <td class="px-4 py-2 text-sm text-gray-700">{{ user.email }}</td>
+                    <td class="px-4 py-2 text-sm text-gray-700">{{ user.is_staff|yesno:"Yes,No" }}</td>
+                    <!-- <td class="px-4 py-2 text-sm text-gray-700">{{ user.role }}</td> -->
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="px-4 py-2 text-center text-sm text-gray-500">No users found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
