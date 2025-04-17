@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}Create Role{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Create New Role</h5>
+            <button id="refresh-perms" class="btn btn-sm btn-light">↻ Refresh Permissions</button>
+        </div>
+        <div class="card-body">
+            <form id="createRoleForm">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="roleName" class="form-label">Role Name</label>
+                    <input type="text" class="form-control" id="roleName" name="name" placeholder="Enter role name" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Permissions</label>
+                    <div id="permissionsList" class="row row-cols-2 row-cols-md-3 g-2">
+                        <!-- Permissions checkboxes will be inserted here -->
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-success">Create Role</button>
+            </form>
+        </div>
+    </div>
+
+    <div id="message" class="mt-3"></div>
+</div>
+{% endblock %}
+
+<!-- {% block disable_default_search_field %}
+Optional CSS override block if needed
+{% endblock %} -->
+
+{% block script %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    const apiUrl = '/role/permission-list/';  // Change this to your actual permission list API
+    const createUrl = '/role/role-create/';  // Change this to your role creation endpoint
+
+    function fetchPermissions() {
+        $.get(apiUrl, function(data) {
+            let container = $('#permissionsList');
+            container.empty();
+            console.log("Fetched permissions:", data);  // Debug log
+
+            data.forEach(perm => {
+                const checkbox = `
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" name="permissions" value="${perm.id}" id="perm-${perm.id}">
+                        <label class="form-check-label" for="perm-${perm.id}">
+                            ${perm.codename.replaceAll('_', ' ')}
+                        </label>
+                    </div>
+                `;
+                container.append(checkbox);
+            });
+        }).fail(() => {
+            $('#message').html(`<div class="alert alert-danger">Failed to load permissions.</div>`);
+        });
+    }
+
+    $(document).ready(function () {
+        fetchPermissions();
+
+        $('#refresh-perms').click(fetchPermissions);
+
+        $('#createRoleForm').on('submit', function (e) {
+            e.preventDefault();
+
+            let permissions = [];
+            $("input[name='permissions']:checked").each(function () {
+                permissions.push($(this).val());
+            });
+
+            const payload = {
+                name: $('#roleName').val(),
+                permissions: permissions
+            };
+
+            $.ajax({
+                url: createUrl,
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(payload),
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                success: function (response) {
+                    $('#message').html(`<div class="alert alert-success">Role created successfully.</div>`);
+                    $('#createRoleForm')[0].reset();
+                },
+                error: function (xhr) {
+                    const err = xhr.responseJSON?.message || 'Something went wrong!';
+                    $('#message').html(`<div class="alert alert-danger">${err}</div>`);
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

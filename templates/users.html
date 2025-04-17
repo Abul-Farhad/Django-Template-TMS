@@ -1,46 +1,130 @@
 {% extends 'base.html' %}
 
+{% block title %}Users{% endblock %}
+
+{% block disable_default_search_field %}
+<style>
+    div.dataTables_filter {
+        display: none;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<!-- Main Content -->
-<div class="flex-1 p-6">
-    <h1 class="text-2xl font-bold mb-4">Users</h1>
+<div class="container-fluid">
+    <h2 class="mb-4">Users</h2>
 
-    <!-- Search Field -->
-    <form method="get" action="{% url 'users' %}" class="mb-4">
-        <input type="text" name="q" placeholder="Search by name"
-            class="w-full max-w-md px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring focus:ring-blue-300"
-            value="{{ request.GET.search|default:'' }}">
-        <button type="submit" class="mt-2 bg-blue-500 text-white py-2 px-4 rounded-md hover:bg-blue-600">
-            Search
-        </button>
-    </form>
-
+    <!-- Search Inputs -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" id="nameSearch" class="form-control" placeholder="Search by name">
+        </div>
+        <div class="col-md-4">
+            <input type="text" id="emailSearch" class="form-control" placeholder="Search by email">
+        </div>
+        <div class="col-md-4">
+            <select id="roleFilter" class="form-select">
+                <option value="">All Roles</option>
+                <!-- Roles will be dynamically populated -->
+            </select>
+        </div>
+    </div>
+    <!-- Export CSV button -->
+    <a href="{% url 'export-users-csv' %}" class="btn btn-success mb-3">
+        Export as CSV
+    </a>
+    <a href="{% url 'export-users-excel' %}" class="btn btn-success mb-3">
+        Export as EXCEL
+    </a>
+    
     <!-- Users Table -->
-    <div class="overflow-x-auto bg-white rounded-lg shadow-md">
-        <table class="min-w-full border-collapse">
-            <thead class="bg-gray-200">
+    <div class="table-responsive">
+        <table id="usersTable" class="table table-striped table-bordered">
+            <thead class="table-dark">
                 <tr>
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Name</th>
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Email</th>
-                    <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Is Staff</th>
-                    <!-- <th class="px-4 py-2 text-left text-sm font-medium text-gray-700">Role</th> -->
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Is Staff</th>
+                    <th>Is Superuser</th>
+                    <th>Role</th>
                 </tr>
             </thead>
             <tbody>
-                {% for user in users %}
-                <tr class="border-t">
-                    <td class="px-4 py-2 text-sm text-gray-700">{{ user.name }}</td>
-                    <td class="px-4 py-2 text-sm text-gray-700">{{ user.email }}</td>
-                    <td class="px-4 py-2 text-sm text-gray-700">{{ user.is_staff|yesno:"Yes,No" }}</td>
-                    <!-- <td class="px-4 py-2 text-sm text-gray-700">{{ user.role }}</td> -->
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="4" class="px-4 py-2 text-center text-sm text-gray-500">No users found.</td>
-                </tr>
-                {% endfor %}
+                <!-- Data populated via JS -->
             </tbody>
         </table>
     </div>
 </div>
+{% endblock %}
+
+{% block script %}
+<!-- jQuery and DataTables -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- DataTables with Bootstrap 5 support -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        // Initialize table
+        const table = $('#usersTable').DataTable({
+            ajax: {
+                url: '/api/user-list/',
+                dataSrc: ''
+            },
+            columns: [
+                { data: 'name' },
+                { data: 'email' },
+                {
+                    data: 'is_staff',
+                    render: function (data) {
+                        return data ? 'Yes' : 'No';
+                    }
+                },
+                {
+                    data: 'is_superuser',
+                    render: function (data) {
+                        return data ? 'Yes' : 'No';
+                    }
+                },
+                { data: 'role' }
+            ],
+            paging: true,
+            searching: true,
+            info: true,
+            responsive: true
+        });
+
+        // Search filters
+        $('#nameSearch').on('keyup', function () {
+            table.column(0).search(this.value).draw();
+        });
+
+        $('#emailSearch').on('keyup', function () {
+            table.column(1).search(this.value).draw();
+        });
+
+        // Role filter
+        $('#roleFilter').on('change', function () {
+            table.column(4).search(this.value).draw();
+        });
+
+        // Fetch and populate roles dynamically
+        $.ajax({
+            url: '/role/role-list/',
+            method: 'GET',
+            success: function (roles) {
+                roles.forEach(role => {
+                    $('#roleFilter').append(
+                        `<option value="${role.name}">${role.name}</option>`
+                    );
+                });
+            },
+            error: function () {
+                console.error("Failed to load roles.");
+            }
+        });
+    });
+</script>
 {% endblock %}

@@ -5,77 +5,170 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Dashboard{% endblock %}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 240px;
+            --navbar-height: 56px;
+        }
+
+        .navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: var(--navbar-height);
+            z-index: 1000;
+        }
+
+
+        #main-content {
+            margin-left: var(--sidebar-width);
+            padding-top: var(--navbar-height);
+            transition: margin-left 0.3s ease;
+        }
+
+        #main-content.full {
+            margin-left: 0;
+            /* when sidebar is collapsed */
+        }
+
+
+        #sidebar {
+            position: fixed;
+            top: var(--navbar-height);
+            left: 0;
+            width: var(--sidebar-width);
+            height: calc(100vh - var(--navbar-height));
+            background-color: #1f2937;
+            z-index: 900;
+            transition: transform 0.3s ease;
+        }
+
+        #sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+
+
+        #sidebar.collapsed {
+            transform: translateX(-100%);
+        }
+    </style>
+    {% block disable_default_search_field %}
+    {% endblock %}
 </head>
 
-<body class="bg-gray-100">
+<body class="bg-light">
     <!-- Navbar -->
-    <nav class="bg-red-500 text-white px-4 py-3">
-        <div class="flex justify-between items-center">
-            <a href="/" class="text-lg font-bold">Task Management System</a>
-            <ul class="flex space-x-4">
-                <li><a href="{% url 'dashboard' %}" class="hover:underline">Dashboard</a></li>
-                <li><a href="/about/" class="hover:underline">About</a></li>
-                <li>
-                    <form method="post" action="{% url 'logout' %}" class="inline">
-                        {% csrf_token %}
-                        <button type="submit"
-                            class="hover:underline text-white bg-transparent border-none cursor-pointer">
-                            Logout
-                        </button>
-                    </form>
-                </li>
-            </ul>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-danger fixed-top">
+
+        <div class="container-fluid">
+            <!-- Sidebar Toggle Button -->
+            <button class="btn btn-outline-light me-2" id="sidebarToggle">
+                ☰
+            </button>
+
+            <a class="navbar-brand" href="/">Task Management System</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about/">About</a>
+                    </li>
+                    <li class="nav-item">
+                        <form method="post" action="{% url 'logout' %}" class="d-inline">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-link nav-link text-white">Logout</button>
+                        </form>
+                    </li>
+                </ul>
+            </div>
         </div>
     </nav>
 
-    <div class="flex">
-        <!-- Sidebar -->
-        <aside class="w-64 bg-gray-700 text-white h-screen p-4">
-            <ul class="space-y-4">
-                <li><a href="{% url 'dashboard' %}" class="block hover:bg-gray-700 p-2 rounded">Dashboard</a></li>
-                <li><a href="{% url 'users' %}" class="block hover:bg-gray-700 p-2 rounded">Users</a></li>
-                <li>
-                    <div class="group">
-                        <button class="w-full text-left hover:bg-gray-700 p-2 rounded">
-                            Manage Roles
-                        </button>
-                        <ul class="hidden group-hover:block bg-gray-700 mt-2 rounded">
-                            <li><a href="/roles/create/" class="block hover:bg-gray-600 p-2 rounded">Create Role</a>
-                            </li>
-                            <li><a href="/roles/update/" class="block hover:bg-gray-600 p-2 rounded">Update Role</a>
-                            </li>
-                            <li><a href="/roles/delete/" class="block hover:bg-gray-600 p-2 rounded">Delete Role</a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-                <li>
-                    <div class="group">
-                        <button class="w-full text-left hover:bg-gray-700 p-2 rounded">
-                            Manage Projects
-                        </button>
-                        <ul class="hidden group-hover:block bg-gray-700 mt-2 rounded">
-                            <li><a href="/roles/create/" class="block hover:bg-gray-600 p-2 rounded">Create Role</a>
-                            </li>
-                            <li><a href="/roles/update/" class="block hover:bg-gray-600 p-2 rounded">Update Role</a>
-                            </li>
-                            <li><a href="/roles/delete/" class="block hover:bg-gray-600 p-2 rounded">Delete Role</a>
-                            </li>
-                        </ul>
-                    </div>
-                </li>
-            </ul>
-        </aside>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <aside id="sidebar" class="bg-dark">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a href="{% url 'dashboard' %}" class="nav-link text-white">Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'users' %}" class="nav-link text-white">Users</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" data-bs-toggle="collapse" href="#rolesMenu" role="button"
+                            aria-expanded="false" aria-controls="rolesMenu">Manage Roles</a>
+                        <div class="collapse" id="rolesMenu">
+                            <ul class="nav flex-column ms-3">
+                                <li class="nav-item">
+                                    <a href="{% url 'role-create' %}" class="nav-link text-white">Create Role</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="/roles/update/" class="nav-link text-white">Update Role</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="/roles/delete/" class="nav-link text-white">Delete Role</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" data-bs-toggle="collapse" href="#projectsMenu" role="button"
+                            aria-expanded="false" aria-controls="projectsMenu">Manage Projects</a>
+                        <div class="collapse" id="projectsMenu">
+                            <ul class="nav flex-column ms-3">
+                                <li class="nav-item">
+                                    <a href="/projects/create/" class="nav-link text-white">Create Project</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="/projects/update/" class="nav-link text-white">Update Project</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a href="/projects/delete/" class="nav-link text-white">Delete Project</a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+                </ul>
+            </aside>
 
-        <!-- Main Content -->
-        <!-- <main class="flex-1 p-6">
-            
-        </main> -->
-        {% block content %}
-        <!-- Page-specific content will go here -->
-        {% endblock %}
+            <!-- Main Content -->
+            <main id="main-content" class="p-4 mt-5">
+
+                {% block content %}
+                <!-- Page-specific content will go here -->
+                {% endblock %}
+            </main>
+        </div>
     </div>
+
+    {% block script %}
+    <!-- Js specific scripts will go here -->
+    {% endblock %}
+
+    <!-- Bootstrap 5 JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Sidebar Toggle Script -->
+    <script>
+        const toggleBtn = document.getElementById('sidebarToggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+
+        toggleBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('full');
+        });
+    </script>
 </body>
 
 </html>
