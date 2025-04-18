@@ -18,7 +18,7 @@ def create_admin_user():
     else:
         print(f"Role '{role_name}' already exists.")
     
-    time.sleep(0.3)  # Add a 1-second delay
+    # time.sleep(0.3)  # Add a 1-second delay
 
     # Step 2: Create all permissions (manually define them here)
     permissions = [
@@ -49,14 +49,14 @@ def create_admin_user():
             print(f"Permission '{perm_data['name']}' already exists.")
         # Assign permission to the role
         admin_role.permissions.add(permission)
-        time.sleep(0.3)  # Add a 1-second delay for each permission
+        # time.sleep(0.3)  # Add a 1-second delay for each permission
     print(f"All permissions assigned to role '{role_name}'.")
-    time.sleep(0.3)
+    # time.sleep(0.3)
 
     # Step 3: Create the superuser
-    superuser_email = 'farhad@admin.com'
+    superuser_email = 'sakib@admin.com'
     superuser_password = 'admin'
-    superuser_name = 'Farhad'
+    superuser_name = 'Sakib'
 
     if not CustomUser.objects.filter(email=superuser_email).exists():
         superuser = CustomUser.objects.create_superuser(
@@ -69,7 +69,7 @@ def create_admin_user():
         print(f"Superuser '{superuser_email}' created and assigned role '{role_name}'.")
     else:
         print(f"Superuser with email '{superuser_email}' already exists.")
-    time.sleep(0.3)
+    # time.sleep(0.3)
 
 if __name__ == '__main__':
     create_admin_user()

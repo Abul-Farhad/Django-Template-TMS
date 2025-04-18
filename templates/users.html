@@ -30,13 +30,13 @@
         </div>
     </div>
     <!-- Export CSV button -->
-    <a href="{% url 'export-users-csv' %}" class="btn btn-success mb-3">
+    <a href="#" id="exportCsvBtn" class="btn btn-success mb-3">
         Export as CSV
     </a>
-    <a href="{% url 'export-users-excel' %}" class="btn btn-success mb-3">
+    <!-- <a href="{% url 'export-users-excel' %}" class="btn btn-success mb-3">
         Export as EXCEL
-    </a>
-    
+    </a> -->
+
     <!-- Users Table -->
     <div class="table-responsive">
         <table id="usersTable" class="table table-striped table-bordered">
@@ -67,11 +67,21 @@
 
 <script>
     $(document).ready(function () {
-        // Initialize table
+        // Initialize DataTable with server-side processing
         const table = $('#usersTable').DataTable({
+            serverSide: true,
+            processing: true,
             ajax: {
                 url: '/api/user-list/',
-                dataSrc: ''
+                data: function (d) {
+                    // Add custom filter params to the request
+                    d.name = $('#nameSearch').val();
+                    d.email = $('#emailSearch').val();
+                    d.role = $('#roleFilter').val();
+                },
+                dataSrc: function (json) {
+                    return json.data; // DataTables expects an object with a "data" array
+                }
             },
             columns: [
                 { data: 'name' },
@@ -91,23 +101,14 @@
                 { data: 'role' }
             ],
             paging: true,
-            searching: true,
+            searching: false, // Disable default search field (we use custom inputs)
             info: true,
             responsive: true
         });
 
-        // Search filters
-        $('#nameSearch').on('keyup', function () {
-            table.column(0).search(this.value).draw();
-        });
-
-        $('#emailSearch').on('keyup', function () {
-            table.column(1).search(this.value).draw();
-        });
-
-        // Role filter
-        $('#roleFilter').on('change', function () {
-            table.column(4).search(this.value).draw();
+        // Custom search filters trigger reload
+        $('#nameSearch, #emailSearch, #roleFilter').on('input change', function () {
+            table.ajax.reload();
         });
 
         // Fetch and populate roles dynamically
@@ -125,6 +126,36 @@
                 console.error("Failed to load roles.");
             }
         });
+        // Attach click event to Export CSV
+        $('#exportCsvBtn').on('click', function (e) {
+            e.preventDefault();
+
+            // Get current filter values
+            const name = $('#nameSearch').val();
+            const email = $('#emailSearch').val();
+            const role = $('#roleFilter').val();
+
+            // Get current ordering info from DataTable
+            const table = $('#usersTable').DataTable();
+            const order = table.order(); // e.g., [[0, 'asc']]
+            const orderColumn = order[0][0]; // index
+            const orderDir = order[0][1];    // 'asc' or 'desc'
+
+            // Build query params
+            const queryParams = new URLSearchParams({
+                name: name,
+                email: email,
+                role: role,
+                'order[0][column]': orderColumn,
+                'order[0][dir]': orderDir
+            });
+
+            // Redirect to CSV URL with filters
+            const exportUrl = `/export-users-csv/?${queryParams.toString()}`;
+            window.location.href = exportUrl;
+        });
+
     });
 </script>
+
 {% endblock %}

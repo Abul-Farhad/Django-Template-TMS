@@ -1,22 +1,45 @@
 from django.http import JsonResponse
 from django.views import View
-from django.core import serializers
 from accounts.models import CustomUser
-import json
 
 
-from django.views import View
-from django.http import JsonResponse
-from accounts.models import CustomUser
 
 class ListUserAPIView(View):
     def get(self, request):
-        search_query = request.GET.get('q', '')
+        draw = int(request.GET.get('draw', 1))
+        start = int(request.GET.get('start', 0))
+        length = int(request.GET.get('length', 10))
 
-        if search_query:
-            users = CustomUser.objects.select_related('role').filter(name__icontains=search_query)
-        else:
-            users = CustomUser.objects.select_related('role').all()
+        name = request.GET.get('name', '')
+        email = request.GET.get('email', '')
+        role = request.GET.get('role', '')
+
+        # Handle ordering
+        order_column_index = request.GET.get('order[0][column]', None)
+        order_dir = request.GET.get('order[0][dir]', 'asc')
+        columns = ['name', 'email', 'is_staff', 'is_superuser', 'role__name']
+        # print("Columns fields: ", columns)
+        order_column = columns[int(order_column_index)]
+        if order_dir == 'desc':
+            order_column = '-' + order_column
+        
+        # print("Order Column: ", order_column)
+        # print("Order Column Index: ", order_column_index)
+
+        # Queryset
+        users = CustomUser.objects.select_related('role')
+
+        if name:
+            users = users.filter(name__icontains=name)
+        if email:
+            users = users.filter(email__icontains=email)
+        if role:
+            users = users.filter(role__name__icontains=role)
+
+        total_count = users.count()
+
+        # Apply ordering and pagination
+        users = users.order_by(order_column)[start:start+length]
 
         data = [
             {
@@ -25,8 +48,14 @@ class ListUserAPIView(View):
                 "email": user.email,
                 "is_staff": user.is_staff,
                 "is_superuser": user.is_superuser,
-                "role": user.role.name if user.role else None  # Safely handle null roles
+                "role": user.role.name if user.role else None
             }
             for user in users
         ]
-        return JsonResponse(data=data, safe=False)
+
+        return JsonResponse({
+            "draw": draw,
+            "recordsTotal": total_count,
+            "recordsFiltered": total_count,
+            "data": data
+        })
