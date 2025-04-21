@@ -33,9 +33,6 @@
     <a href="#" id="exportCsvBtn" class="btn btn-success mb-3">
         Export as CSV
     </a>
-    <!-- <a href="{% url 'export-users-excel' %}" class="btn btn-success mb-3">
-        Export as EXCEL
-    </a> -->
 
     <!-- Users Table -->
     <div class="table-responsive">
@@ -143,6 +140,7 @@
 
             // Build query params
             const queryParams = new URLSearchParams({
+                'export': 'csv',
                 name: name,
                 email: email,
                 role: role,
@@ -151,7 +149,7 @@
             });
 
             // Redirect to CSV URL with filters
-            const exportUrl = `/export-users-csv/?${queryParams.toString()}`;
+            const exportUrl = `/api/export-user-csv/?${queryParams.toString()}`;
             window.location.href = exportUrl;
         });
 
