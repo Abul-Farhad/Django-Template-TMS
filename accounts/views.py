@@ -15,16 +15,18 @@ class LoginView(View):
         if form.is_valid():
             email = form.cleaned_data['email']
             password = form.cleaned_data['password']
-            user = authenticate(request, username=email, password=password)
+            print("Email: ", email)
+            print("Password: ", password)
+            user = authenticate(request, email=email, password=password)
             if user is not None:
                 login(request, user)
                 return redirect('dashboard')  # Replace 'dashboard' with your desired redirect URL name
             else:
                 messages.error(request, 'Invalid email or password.')
-                return redirect('login')
+                return redirect('user_login')
         else:
             messages.error(request, 'Please correct the errors below.')
-            return redirect('login')
+            return redirect('user_login')
 
 
 
@@ -32,7 +34,7 @@ class LogoutView(View):
         
     def post(self, request):
         logout(request)
-        return redirect('login')  # Replace 'login' with your login URL name
+        return redirect('user_login')  # Replace 'login' with your login URL name
 
 
 class RegisterView(View):
@@ -45,10 +47,10 @@ class RegisterView(View):
         if form.is_valid():
             form.save()
             messages.success(request, 'Registration successful. You can now log in.')
-            return redirect('login')  # Replace 'login' with your login URL name
+            return redirect('user_login')  # Replace 'login' with your login URL name
         else:
             messages.error(request, 'Please correct the errors below.')
-            redirect('register')
+            redirect('user_register')
         
         return render(request, 'register.html', {'form': form})
 

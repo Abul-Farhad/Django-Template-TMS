@@ -3,6 +3,7 @@ from .users.views import (
     ListUserAPIView,
 )
 from .csv.views import ExportUserCSVView
+from .role.views import RoleListSelectAPIView
 # from .permissions.views import(
 #     PermissionListView
 # )
@@ -10,7 +11,8 @@ from .csv.views import ExportUserCSVView
 
 urlpatterns = [
     path('user-list/', ListUserAPIView.as_view(), name='user-list'),
-    path('export-user-csv/', ExportUserCSVView.as_view(), name='export-user-csv')
+    path('export-user-csv/', ExportUserCSVView.as_view(), name='export-user-csv'),
+    path('role-list/', RoleListSelectAPIView.as_view(), name='role-list')
     # path('permission-list/', PermissionListView.as_view(), name='permission-list')
 
 ]

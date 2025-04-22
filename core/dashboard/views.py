@@ -14,5 +14,5 @@ class DashboardView(View):
         else:
             print("No, not authenticated")
             messages.warning(request, 'You must be logged in to access this page.')
-            return redirect('login')
+            return redirect('user_login')
         

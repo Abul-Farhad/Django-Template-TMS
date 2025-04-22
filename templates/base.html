@@ -83,7 +83,7 @@
                         <a class="nav-link" href="/about/">About</a>
                     </li>
                     <li class="nav-item">
-                        <form method="post" action="{% url 'logout' %}" class="d-inline">
+                        <form method="post" action="{% url 'user_logout' %}" class="d-inline">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-link nav-link text-white">Logout</button>
                         </form>

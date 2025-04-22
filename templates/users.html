@@ -29,6 +29,12 @@
             </select>
         </div>
     </div>
+    <!-- Create User Button -->
+    {% if request.user.is_superuser %}
+        <a href="{% url 'user_create' %}" class="btn btn-primary mb-3">
+            Create User
+        </a>
+    {% endif %}
     <!-- Export CSV button -->
     <a href="#" id="exportCsvBtn" class="btn btn-success mb-3">
         Export as CSV
@@ -44,6 +50,7 @@
                     <th>Is Staff</th>
                     <th>Is Superuser</th>
                     <th>Role</th>
+                    <th>Operations</th>
                 </tr>
             </thead>
             <tbody>
@@ -95,7 +102,10 @@
                         return data ? 'Yes' : 'No';
                     }
                 },
-                { data: 'role' }
+                { data: 'role' },
+                {
+                    data: null,
+                }
             ],
             paging: true,
             searching: false, // Disable default search field (we use custom inputs)

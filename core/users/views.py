@@ -2,6 +2,9 @@
 from django.shortcuts import render
 from django.views import View
 from accounts.models import CustomUser
+from accounts.forms import UserForm
+from django.contrib import messages
+from django.shortcuts import redirect
 
 
 class ListUsersView(View):
@@ -15,3 +18,23 @@ class ListUsersView(View):
         #     users = CustomUser.objects.all().order_by('id')
         # return render(request, 'users.html', {'users': users})
         return render(request, 'users.html', {})
+    
+class UserCreateView(View):
+    template_name = 'user_create.html'
+
+    def get(self, request):
+        form = UserForm()
+        return render(request, self.template_name, {"form": form})
+
+    def post(self, request):
+        form = UserForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.set_password(form.cleaned_data['password'])  # hash the password
+            user.save()
+            messages.success(request, "User created successfully.")
+            return redirect('user_create')  # or wherever you want to redirect
+        else:
+            messages.error(request, "Please correct the errors below.")
+        return render(request, self.template_name, {"form": form})
+

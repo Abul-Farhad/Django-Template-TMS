@@ -3,7 +3,7 @@ from rest_framework.filters import OrderingFilter
 from accounts.filters import UserFilter
 from accounts.models import CustomUser
 from accounts.serializers import ExportUserSerializer
-from core.export_csv.base import BaseListAPIViewWithCSVExport
+from core.generic_base.base import BaseListAPIViewWithCSVExport
 
 
 class ExportUserCSVView(BaseListAPIViewWithCSVExport):
