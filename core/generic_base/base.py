@@ -16,7 +16,7 @@ class BaseListAPIViewWithCSVExport(ListAPIView):
     csv_filename = 'data.csv'  # Default filename
     def get_queryset(self):
         queryset = super().get_queryset()
-
+        
         # Handle DataTables ordering
         order_column_index = self.request.GET.get('order[0][column]')
         order_dir = self.request.GET.get('order[0][dir]', 'asc')
@@ -47,6 +47,7 @@ class BaseListAPIViewWithCSVExport(ListAPIView):
         draw = int(request.GET.get('draw', 1))
         start = int(request.GET.get('start', 0))
         length = int(request.GET.get('length', 10))
+    
 
         total_records = self.get_queryset().count()
         filtered_records = queryset.count()
@@ -83,14 +84,22 @@ class BaseListAPIViewWithCSVExport(ListAPIView):
 
     def stream_queryset_rows(self, queryset, writer):
         # Yield header manually (match fields as needed)
-        yield writer.writerow(['Name', 'Email', 'Is Staff', 'Is Superuser', 'Role'])
+        print("Parent class stream_queryset_rows method called")
+        headers = self.column_mapping.values()
+        yield writer.writerow(headers)
 
         for user in queryset.iterator(chunk_size=1000):
-            yield writer.writerow([
-                user.name,
-                user.email,
-                'Yes' if user.is_staff else 'No',
-                'Yes' if user.is_superuser else 'No',
-                user.role.name if user.role else '—'
-            ])
+
+            row = [getattr(user, field, None) for field in headers]
+                    
+            yield writer.writerow(
+                row
+                
+                
+            )
+            # user.name,
+                # user.email,
+                # 'Yes' if user.is_staff else 'No',
+                # 'Yes' if user.is_superuser else 'No',
+                # user.role.name if user.role else '—'
 

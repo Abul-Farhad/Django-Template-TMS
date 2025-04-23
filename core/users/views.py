@@ -20,7 +20,7 @@ class ListUsersView(View):
         return render(request, 'users.html', {})
     
 class UserCreateView(View):
-    template_name = 'user_create.html'
+    template_name = 'create_user.html'
 
     def get(self, request):
         form = UserForm()
@@ -33,7 +33,7 @@ class UserCreateView(View):
             user.set_password(form.cleaned_data['password'])  # hash the password
             user.save()
             messages.success(request, "User created successfully.")
-            return redirect('user_create')  # or wherever you want to redirect
+            return redirect('create_user')  # or wherever you want to redirect
         else:
             messages.error(request, "Please correct the errors below.")
         return render(request, self.template_name, {"form": form})

@@ -34,7 +34,6 @@ class CustomUser(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
     role = models.ForeignKey('permissions.Role', on_delete=models.SET_NULL, null=True, blank=True, related_name='users')   
-    # assigned_projects = models.ManyToManyField('projects.Project', blank=True, related_name='users')
     
     USERNAME_FIELD = 'email'  # Use email as the unique identifier
     REQUIRED_FIELDS = []  # No additional required fields

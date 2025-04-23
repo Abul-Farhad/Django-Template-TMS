@@ -31,7 +31,7 @@
     </div>
     <!-- Create User Button -->
     {% if request.user.is_superuser %}
-        <a href="{% url 'user_create' %}" class="btn btn-primary mb-3">
+        <a href="{% url 'create_user' %}" class="btn btn-primary mb-3">
             Create User
         </a>
     {% endif %}

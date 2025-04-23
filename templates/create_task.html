@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Task{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    {% if messages %}
+    {% for message in messages %}
+    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+        {{ message }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% endif %}
+    <h2 class="mb-4">Create New Task</h2>
+    <form method="post" novalidate>
+        {% csrf_token %}
+        {% if form.non_field_errors %}
+        <div class="alert alert-danger">
+            {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
+        <div class="mb-3">
+            {{ form.title.label_tag }}
+            {{ form.title }}
+            {% if form.title.errors %}
+            <div class="text-danger">{{ form.title.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.description.label_tag }}
+            {{ form.description }}
+            {% if form.description.errors %}
+            <div class="text-danger">{{ form.description.errors }}</div>
+            {% endif %}
+        </div>
+
+        <div class="mb-3">
+            {{ form.status.label_tag }}
+            {{ form.status }}
+            {% if form.status.errors %}
+            <div class="text-danger">{{ form.status.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            {{ form.priority.label_tag }}
+            {{ form.priority }}
+            {% if form.priority.errors %}
+            <div class="text-danger">{{ form.priority.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            <label for="assigned_to" class="form-label">Assigned To</label>
+            <select id="assigned_to" name="assigned_to" class="form-control select2-field" data-api-url="/api/user-list/">
+                <!-- Select2 will load options dynamically -->
+            </select>
+        </div>
+        
+        <div class="mb-3">
+            <label for="project" class="form-label">Project</label>
+            <select id="project" name="project" class="form-control select2-field" data-api-url="/api/task-list/">
+                <!-- Select2 will load options dynamically -->
+            </select>
+        </div>
+        
+        <!-- <div class="mb-3">
+            {{ form.assigned_to.label_tag }}
+            {{ form.assigned_to }}
+            {% if form.assigned_to.errors %}
+            <div class="text-danger">{{ form.assigned_to.errors }}</div>
+            {% endif %}
+        </div>
+        <div class="mb-3">
+            {{ form.project.label_tag }}
+            {{ form.project }}
+            {% if form.project.errors %}
+            <div class="text-danger">{{ form.project.errors }}</div>
+            {% endif %}
+        </div> -->
+
+
+
+        <button type="submit" class="btn btn-primary">Create New Task</button>
+    </form>
+</div>
+{% endblock %}
+
+{% block script %}
+<!-- jQuery + Select2 JS -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+<!-- Select2 CSS -->
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+
+<script>
+    $(document).ready(function () {
+        $('.select2-field').each(function () {
+            const $el = $(this);
+           
+            const apiUrl = $el.data('api-url');
+            console.log($el.data('api-url'));
+
+            if (apiUrl) {
+                $el.select2({
+                    placeholder: $el.attr('placeholder') || 'Select an option',
+                    dropdownParent: $el.parent(),
+                    ajax: {
+                        url: apiUrl,
+                        dataType: 'json',
+                        delay: 250,
+                        data: function (params) {
+                            return {
+                                q: params.term,
+                                page: params.page || 1
+                            };
+                        },
+                        processResults: function (data, params) {
+                            params.page = params.page || 1;
+                            return {
+                                results: data.data.map(item => ({
+                                    id: item.id,
+                                    text: item.name || item.email || item.title
+                                })),
+                                pagination: {
+                                    more: data.pagination?.more || false
+                                }
+                            };
+                        },
+                        cache: true
+                    },
+                    minimumInputLength: 0
+                });
+            }
+        });
+    });
+</script>
+
+{% endblock %}

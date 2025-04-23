@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+
+{% block title %}Tasks{% endblock %}
+
+{% block disable_default_search_field %}
+<style>
+    div.dataTables_filter {
+        display: none;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Tasks</h2>
+
+    <!-- Search Inputs -->
+    <div class="row mb-3">
+        <div class="col-md-4">
+            <input type="text" id="titleSearch" class="form-control" placeholder="Search by title">
+        </div>
+        <div class="col-md-4">
+            <input type="text" id="emailSearch" class="form-control" placeholder="Search by email">
+        </div>
+        <div class="col-md-4">
+            <select id="statusFilter" class="form-select">
+                <option value="">All Status</option>
+                {% for value, label in form.fields.status.choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+        <div class="col-md-4">
+            <select id="priorityFilter" class="form-select">
+                <option value="">All Priority</option>
+                {% for value, label in form.fields.priority.choices %}
+                    
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
+    </div>
+    <!-- Create User Button -->
+    <a href="{% url 'create_task' %}" class="btn btn-primary mb-3">
+        Create Task
+    </a>
+    <!-- Export CSV button -->
+    <a href="#" id="exportCsvBtn" class="btn btn-success mb-3">
+        Export as CSV
+    </a>
+
+    <!-- Users Table -->
+    <div class="table-responsive">
+        <table id="usersTable" class="table table-striped table-bordered">
+            <thead class="table-dark">
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Assigned User</th>
+                    <th>Project</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Due Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data populated via JS -->
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block script %}
+<!-- jQuery and DataTables -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<!-- DataTables with Bootstrap 5 support -->
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.4/css/dataTables.bootstrap5.min.css">
+<script src="https://cdn.datatables.net/1.13.4/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.4/js/dataTables.bootstrap5.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+        // Initialize DataTable with server-side processing
+        const table = $('#usersTable').DataTable({
+            serverSide: true,
+            processing: true,
+            ajax: {
+                url: '/api/task-list/',
+                data: function (d) {
+                    // Add custom filter params to the request
+                    d.title = $('#titleSearch').val();
+                    d.assigned_to = $('#emailSearch').val();
+                    d.status = $('#statusFilter').val();
+                    d.priority = $('#priorityFilter').val();
+                },
+                dataSrc: function (json) {
+                    return json.data; // DataTables expects an object with a "data" array
+                }
+            },
+            columns: [
+                { data: 'title' },
+                { data: 'description' },
+                {data: 'assigned_to'},
+                { data: 'project' },
+                { data: 'priority' },
+                {data: 'status'},
+                { data: 'due_date' }
+            ],
+            paging: true,
+            searching: false, // Disable default search field (we use custom inputs)
+            info: true,
+            responsive: true
+        });
+
+        // Custom search filters trigger reload
+        $('#titleSearch, #emailSearch, #statusFilter, #priorityFilter').on('input change', function () {
+            table.ajax.reload();
+        });
+
+        
+        // Attach click event to Export CSV
+        $('#exportCsvBtn').on('click', function (e) {
+            e.preventDefault();
+
+            // Get current filter values
+            const title = $('#titleSearch').val();
+            const email = $('#emailSearch').val();
+            const status = $('#statusFilter').val();
+            const priority = $('#priorityFilter').val();
+
+            // Get current ordering info from DataTable
+            const table = $('#usersTable').DataTable();
+            const order = table.order(); // e.g., [[0, 'asc']]
+            const orderColumn = order[0][0]; // index
+            const orderDir = order[0][1];    // 'asc' or 'desc'
+
+            // Build query params
+            const queryParams = new URLSearchParams({
+                'export': 'csv',
+                title: title,
+                assigned_to: email,
+                status: status,
+                priority: priority,
+                'order[0][column]': orderColumn,
+                'order[0][dir]': orderDir
+            });
+
+            // Redirect to CSV URL with filters
+            const exportUrl = `/api/export-task-csv/?${queryParams.toString()}`;
+            window.location.href = exportUrl;
+        });
+
+    });
+</script>
+
+{% endblock %}
