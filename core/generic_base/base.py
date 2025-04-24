@@ -15,17 +15,18 @@ class BaseListAPIViewWithCSVExport(ListAPIView):
     export_csv_serializer_class = None  # Must be defined in child
     csv_filename = 'data.csv'  # Default filename
     def get_queryset(self):
-        queryset = super().get_queryset()
+        # queryset = super().get_queryset()
+        queryset = self.queryset
         
         # Handle DataTables ordering
         order_column_index = self.request.GET.get('order[0][column]')
         order_dir = self.request.GET.get('order[0][dir]', 'asc')
-        print("#####################################################")
-        print("\t\tPrinting Query Params")
-        print("#####################################################")
+        # print("#####################################################")
+        # print("\t\tPrinting Query Params")
+        # print("#####################################################")
 
-        for key, val in self.request.GET.items():
-            print(f"{key}: {val}")
+        # for key, val in self.request.GET.items():
+        #     print(f"{key}: {val}")
 
         if order_column_index is not None:
             try:
@@ -49,16 +50,16 @@ class BaseListAPIViewWithCSVExport(ListAPIView):
         length = int(request.GET.get('length', 10))
     
 
-        total_records = self.get_queryset().count()
-        filtered_records = queryset.count()
+        # total_records = self.queryset.count()
+        # filtered_records = queryset.count()
 
         page = queryset[start:start+length]
         serializer = self.get_serializer(page, many=True)
-
+        
         return Response({
-            'draw': draw,
-            'recordsTotal': total_records,
-            'recordsFiltered': filtered_records,
+            # 'draw': draw,
+            # 'recordsTotal': total_records,
+            # 'recordsFiltered': filtered_records,
             'data': serializer.data
         })
     
@@ -71,7 +72,7 @@ class BaseListAPIViewWithCSVExport(ListAPIView):
     def export_as_csv(self, request):
         start = time.time()
         queryset = self.filter_queryset(self.get_queryset())
-        print(f"Filtered queryset in {time.time() - start:.2f}s")  # <--- Add this
+        # print(f"Filtered queryset in {time.time() - start:.2f}s")  # <--- Add this
         pseudo_buffer = Echo()
         writer = csv.writer(pseudo_buffer)
 
@@ -84,7 +85,7 @@ class BaseListAPIViewWithCSVExport(ListAPIView):
 
     def stream_queryset_rows(self, queryset, writer):
         # Yield header manually (match fields as needed)
-        print("Parent class stream_queryset_rows method called")
+        # print("Parent class stream_queryset_rows method called")
         headers = self.column_mapping.values()
         yield writer.writerow(headers)
 

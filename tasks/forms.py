@@ -1,16 +1,10 @@
 from django import forms
+from accounts.models import CustomUser
+from projects.models import Project
+from tasks.models import Task
 
-class TaskForm(forms.Form):
-    STATUS_CHOICES = [
-        ('open', 'Open'),
-        ('in_progress', 'In Progress'),
-        ('closed', 'Closed'),
-    ]
-    PRIORITY_CHOICES = [
-        ('low', 'Low'),
-        ('medium', 'Medium'),
-        ('high', 'High'),
-    ]
+class TaskForm(forms.ModelForm):
+  
 
     title = forms.CharField(
         max_length=255,
@@ -21,31 +15,35 @@ class TaskForm(forms.Form):
         required=True,
         widget=forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Task Description'})
     )
-    assigned_to = forms.CharField(
+
+    assigned_to = forms.ModelChoiceField(
+        queryset=CustomUser.objects.none(),  # Replace with your CustomUser model's queryset
         required=True,
-        widget=forms.HiddenInput(attrs={
+        widget=forms.Select(attrs={
             'class': 'form-control select2-field',
-            'data-api-url': '/api/user-list/',
-            'placeholder': 'Assigned To',
-            'id': 'assigned_to'
-        })
+            "data-api-url": "/api/user-list/",
+            "data-q": "email",
+            'data-text': 'email'
+            })
     )
-    project = forms.CharField(
+ 
+    project = forms.ModelChoiceField(
+        queryset=Project.objects.none(),  # Replace with your Project model's queryset
         required=True,
-        widget=forms.HiddenInput(attrs={
+        widget=forms.Select(attrs={
             'class': 'form-control select2-field',
-            'data-api-url': '/api/task-list/',
-            'placeholder': 'Project',
-            'id': 'project'
-        })
+            "data-api-url": "/api/project-list/",
+            "data-q": "title",
+            'data-text': 'title'
+            })
     )
     status = forms.ChoiceField(
-        choices=STATUS_CHOICES,
+        choices=Task.STATUS_CHOICES,
         required=True,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
     priority = forms.ChoiceField(
-        choices=PRIORITY_CHOICES,
+        choices=Task.PRIORITY_CHOICES,
         required=True,
         widget=forms.Select(attrs={'class': 'form-control'})
     )
@@ -55,3 +53,11 @@ class TaskForm(forms.Form):
     )
     created_at = forms.DateTimeField(required=False)
     updated_at = forms.DateTimeField(required=False)
+
+    class Meta:
+        model = Task
+        fields = ['title', 'description', 'status', 'priority', 'assigned_to', 'project', 'due_date']
+
+
+
+

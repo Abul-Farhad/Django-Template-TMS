@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Create Task{% endblock %}
+{% block title %}Create Project{% endblock %}
 
 {% block content %}
 <div class="container mt-5">
@@ -12,7 +12,7 @@
     </div>
     {% endfor %}
     {% endif %}
-    <h2 class="mb-4">Create New Task</h2>
+    <h2 class="mb-4">Create New Project</h2>
     <form method="post" novalidate>
         {% csrf_token %}
         {% if form.non_field_errors %}
@@ -60,18 +60,12 @@
             </select>
         </div> -->
 
+        
         <div class="mb-3">
-            {{ form.assigned_to.label_tag }}
-            {{ form.assigned_to }}
-            {% if form.assigned_to.errors %}
-            <div class="text-danger">{{ form.assigned_to.errors }}</div>
-            {% endif %}
-        </div>
-        <div class="mb-3">
-            {{ form.project.label_tag }}
-            {{ form.project }}
-            {% if form.project.errors %}
-            <div class="text-danger">{{ form.project.errors }}</div>
+            {{ form.task_list.label_tag }}
+            {{ form.task_list }}
+            {% if form.task_list.errors %}
+            <div class="text-danger">{{ form.task_list.errors }}</div>
             {% endif %}
         </div>
         <div class="mb-3">
@@ -117,6 +111,7 @@
                         data: function (params) {
                             const queryKey = $el.data('q'); // Get the dynamic key
                             console.log("queryKey", queryKey);
+                            
                             return {
                                 [queryKey]: params.term, // Use square brackets for dynamic key
                                 page: params.page || 1

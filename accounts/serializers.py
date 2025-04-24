@@ -8,4 +8,4 @@ class ExportUserSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = CustomUser
-        fields = ['name', 'email', 'is_staff', 'is_superuser', 'role']
+        fields = ['id', 'name', 'email', 'is_staff', 'is_superuser', 'role']

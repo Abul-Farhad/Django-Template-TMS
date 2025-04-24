@@ -27,26 +27,26 @@ class TaskListAPIView(BaseListAPIViewWithCSVExport):
         6: 'due_date',
     }
 
-    def stream_queryset_rows(self, queryset, writer):
-        headers = list(self.column_mapping.values())
-        yield writer.writerow(headers)
+    # def stream_queryset_rows(self, queryset, writer):
+    #     headers = list(self.column_mapping.values())
+    #     yield writer.writerow(headers)
 
-        print("Headers: ", headers)
-        # Optional field-value custom render logic
-        column_value_getters = {
-            'assigned_to': lambda obj: getattr(obj.assigned_to, 'email', ''),
-            'project': lambda obj: getattr(obj.project, 'title', ''),
-        }
+    #     print("Headers: ", headers)
+    #     # Optional field-value custom render logic
+    #     column_value_getters = {
+    #         'assigned_to': lambda obj: getattr(obj.assigned_to, 'email', ''),
+    #         'project': lambda obj: getattr(obj.project, 'title', ''),
+    #     }
 
-        for obj in queryset.iterator(chunk_size=1000):
-            row = []
-            for field in headers:
-                if field in column_value_getters:
-                    value = column_value_getters[field](obj)
-                else:
-                    value = getattr(obj, field, '')
-                row.append(value)
-            yield writer.writerow(row)
+    #     for obj in queryset.iterator(chunk_size=1000):
+    #         row = []
+    #         for field in headers:
+    #             if field in column_value_getters:
+    #                 value = column_value_getters[field](obj)
+    #             else:
+    #                 value = getattr(obj, field, '')
+    #             row.append(value)
+    #         yield writer.writerow(row)
 
 
     # def get_queryset(self):

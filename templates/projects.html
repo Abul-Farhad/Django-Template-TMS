@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Users{% endblock %}
+{% block title %}Projects{% endblock %}
 
 {% block disable_default_search_field %}
 <style>
@@ -12,29 +12,40 @@
 
 {% block content %}
 <div class="container-fluid">
-    <h2 class="mb-4">Users</h2>
+    <h2 class="mb-4">Projects</h2>
 
     <!-- Search Inputs -->
     <div class="row mb-3">
         <div class="col-md-4">
-            <input type="text" id="nameSearch" class="form-control" placeholder="Search by name">
+            <input type="text" id="titleSearch" class="form-control" placeholder="Search by title">
         </div>
         <div class="col-md-4">
             <input type="text" id="emailSearch" class="form-control" placeholder="Search by email">
         </div>
         <div class="col-md-4">
-            <select id="roleFilter" class="form-select">
-                <option value="">All Roles</option>
-                <!-- Roles will be dynamically populated -->
+            <select id="statusFilter" class="form-select">
+                <option value="">All Status</option>
+                {% for value, label in form.fields.status.choices %}
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
             </select>
         </div>
+        
+        <div class="col-md-4">
+            <select id="priorityFilter" class="form-select">
+                <option value="">All Priority</option>
+                {% for value, label in form.fields.priority.choices %}
+                    
+                    <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        
     </div>
     <!-- Create User Button -->
-    {% if request.user.is_superuser %}
-        <a href="{% url 'create_user' %}" class="btn btn-primary mb-3">
-            Create User
-        </a>
-    {% endif %}
+    <a href="{% url 'create_project' %}" class="btn btn-primary mb-3">
+        Create Project
+    </a>
     <!-- Export CSV button -->
     <a href="#" id="exportCsvBtn" class="btn btn-success mb-3">
         Export as CSV
@@ -45,12 +56,12 @@
         <table id="usersTable" class="table table-striped table-bordered">
             <thead class="table-dark">
                 <tr>
-                    <th>Name</th>
-                    <th>Email</th>
-                    <th>Is Staff</th>
-                    <th>Is Superuser</th>
-                    <th>Role</th>
-                    <th>Operations</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <!-- <th>Total Tasks</th> -->
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Due Date</th>
                 </tr>
             </thead>
             <tbody>
@@ -76,37 +87,24 @@
             serverSide: true,
             processing: true,
             ajax: {
-                url: '/api/user-list/',
+                url: '/api/project-list/',
                 data: function (d) {
                     // Add custom filter params to the request
-                    d.name = $('#nameSearch').val();
-                    d.email = $('#emailSearch').val();
-                    d.role = $('#roleFilter').val();
+                    d.title = $('#titleSearch').val();
+                    // d.assigned_to = $('#emailSearch').val();
+                    d.status = $('#statusFilter').val();
+                    d.priority = $('#priorityFilter').val();
                 },
                 dataSrc: function (json) {
-                    console.log(json.data);
                     return json.data; // DataTables expects an object with a "data" array
                 }
             },
             columns: [
-                { data: 'name' },
-                { data: 'email' },
-                {
-                    data: 'is_staff',
-                    render: function (data) {
-                        return data ? 'Yes' : 'No';
-                    }
-                },
-                {
-                    data: 'is_superuser',
-                    render: function (data) {
-                        return data ? 'Yes' : 'No';
-                    }
-                },
-                { data: 'role' },
-                {
-                    data: null,
-                }
+                { data: 'title' },
+                { data: 'description' },
+                { data: 'priority' },
+                { data: 'status'},
+                { data: 'due_date' }
             ],
             paging: true,
             searching: false, // Disable default search field (we use custom inputs)
@@ -115,33 +113,19 @@
         });
 
         // Custom search filters trigger reload
-        $('#nameSearch, #emailSearch, #roleFilter').on('input change', function () {
+        $('#titleSearch, #statusFilter, #priorityFilter').on('input change', function () {
             table.ajax.reload();
         });
 
-        // Fetch and populate roles dynamically
-        $.ajax({
-            url: '/role/role-list/',
-            method: 'GET',
-            success: function (roles) {
-                roles.forEach(role => {
-                    $('#roleFilter').append(
-                        `<option value="${role.name}">${role.name}</option>`
-                    );
-                });
-            },
-            error: function () {
-                console.error("Failed to load roles.");
-            }
-        });
+        
         // Attach click event to Export CSV
         $('#exportCsvBtn').on('click', function (e) {
             e.preventDefault();
 
             // Get current filter values
-            const name = $('#nameSearch').val();
-            const email = $('#emailSearch').val();
-            const role = $('#roleFilter').val();
+            const title = $('#titleSearch').val();
+            const status = $('#statusFilter').val();
+            const priority = $('#priorityFilter').val();
 
             // Get current ordering info from DataTable
             const table = $('#usersTable').DataTable();
@@ -152,15 +136,15 @@
             // Build query params
             const queryParams = new URLSearchParams({
                 'export': 'csv',
-                name: name,
-                email: email,
-                role: role,
+                title: title,
+                status: status,
+                priority: priority,
                 'order[0][column]': orderColumn,
                 'order[0][dir]': orderDir
             });
 
             // Redirect to CSV URL with filters
-            const exportUrl = `/api/export-user-csv/?${queryParams.toString()}`;
+            const exportUrl = `/api/project-list/?${queryParams.toString()}`;
             window.location.href = exportUrl;
         });
 
