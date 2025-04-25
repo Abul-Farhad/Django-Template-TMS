@@ -90,14 +90,12 @@
 
 <!-- Select2 CSS -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="/path/to/select2.css">
+<!-- <link rel="stylesheet" href="/path/to/select2.css"> -->
 <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css"> -->
-<script>
+<!-- <script>
     $(document).ready(function () {
         $('.select2-field').each(function () {
             const $el = $(this);
-
-            const apiUrl = $el.data('api-url');
             console.log($el.data('api-url'));
 
             if (apiUrl) {
@@ -110,10 +108,12 @@
                         delay: 250,
                         data: function (params) {
                             const queryKey = $el.data('q'); // Get the dynamic key
+                            const queryFilter = $el.data('filter_no_project')
                             console.log("queryKey", queryKey);
                             
                             return {
                                 [queryKey]: params.term, // Use square brackets for dynamic key
+                                [queryFilter]: true,
                                 page: params.page || 1
                             };
                         },
@@ -142,6 +142,42 @@
         //     theme: 'bootstrap4',
         // });
     });
+</script> -->
+
+<script>
+    $('.select2-field').each(function () {
+    const $el = $(this);
+    const config = JSON.parse($el.attr('data-config')); // ⬅️ THIS is how JS reads the injected data
+
+    if (config.apiUrl) {
+        $el.select2({
+            ajax: {
+                url: config.apiUrl,
+                data: function (params) {
+                    let query = {
+                        [config.queryParam]: params.term,
+                        page: params.page || 1
+                    };
+
+                    if (config.filters) {
+                        Object.assign(query, config.filters);
+                    }
+
+                    return query;
+                },
+                processResults: function (data) {
+                    return {
+                        results: data.data.map(item => ({
+                            id: item.id,
+                            text: item[config.textField]
+                        }))
+                    };
+                }
+            }
+        });
+    }
+});
+
 </script>
 
 {% endblock %}

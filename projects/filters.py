@@ -11,4 +11,4 @@ class ProjectFilter(django_filters.FilterSet):
 
     class Meta:
         model = Project
-        fields = ['id', 'title', 'description', 'status', 'priority', 'task_list', 'created_at', 'updated_at']
+        fields = ['id', 'title', 'description', 'status', 'priority', 'created_at', 'updated_at']

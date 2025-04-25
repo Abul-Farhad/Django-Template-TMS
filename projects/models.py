@@ -1,6 +1,5 @@
 from django.db import models
 
-
 # Create your models here.
 
 class Project(models.Model):
@@ -27,11 +26,10 @@ class Project(models.Model):
         default='Low', 
         choices=PRIORITY_CHOICES)
     
-    task_list = models.ManyToManyField('tasks.Task', blank=True, null=True, related_name='projects')
+    # task_list = models.ManyToManyField('tasks.Task', blank=True, null=True, related_name='projects')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     due_date = models.DateField(null=True, blank=True)
-
 
     def __str__(self):
         return self.title

@@ -27,6 +27,11 @@ class TaskListAPIView(BaseListAPIViewWithCSVExport):
         6: 'due_date',
     }
 
+    # def list(self, request, *args, **kwargs):
+    #     if request.GET.get('filter_no_project') == 'true':
+    #         self.queryset = self.queryset.filter(project__isnull=True)
+    #     return super().list(request, *args, **kwargs)
+
     # def stream_queryset_rows(self, queryset, writer):
     #     headers = list(self.column_mapping.values())
     #     yield writer.writerow(headers)

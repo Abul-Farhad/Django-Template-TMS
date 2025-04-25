@@ -50,16 +50,16 @@ class BaseListAPIViewWithCSVExport(ListAPIView):
         length = int(request.GET.get('length', 10))
     
 
-        # total_records = self.queryset.count()
-        # filtered_records = queryset.count()
+        total_records = self.queryset.count()
+        filtered_records = queryset.count()
 
         page = queryset[start:start+length]
         serializer = self.get_serializer(page, many=True)
         
         return Response({
-            # 'draw': draw,
-            # 'recordsTotal': total_records,
-            # 'recordsFiltered': filtered_records,
+            'draw': draw,
+            'recordsTotal': total_records,
+            'recordsFiltered': filtered_records,
             'data': serializer.data
         })
     

@@ -23,12 +23,18 @@ class CreateTaskView(View):
         # Dynamically set the queryset for form fields
 
         if 'assigned_to' in request.POST:
-            assigned_id = request.POST.get('assigned_to')
-            form.fields['assigned_to'].queryset = CustomUser.objects.filter(id=assigned_id)
+            try:
+                assigned_id = request.POST.get('assigned_to')
+                form.fields['assigned_to'].queryset = CustomUser.objects.filter(id=assigned_id)
+            except:
+                pass
         
         if 'project' in request.POST:
-            project_id = request.POST.get('project')
-            form.fields['project'].queryset = Project.objects.filter(id=project_id)
+            try:
+                project_id = request.POST.get('project')
+                form.fields['project'].queryset = Project.objects.filter(id=project_id)
+            except:
+                pass
         print(form.fields)
         if form.is_valid():
             task = form.save(commit=False)

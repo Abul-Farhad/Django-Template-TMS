@@ -96,7 +96,7 @@
 
 <!-- Select2 CSS -->
 <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
-<link rel="stylesheet" href="/path/to/select2.css">
+<!-- <link rel="stylesheet" href="/path/to/select2.css"> -->
 <!-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@ttskch/select2-bootstrap4-theme@x.x.x/dist/select2-bootstrap4.min.css"> -->
 <script>
     $(document).ready(function () {
@@ -115,21 +115,18 @@
                         dataType: 'json',
                         delay: 250,
                         data: function (params) {
-                            const queryKey = $el.data('q'); // Get the dynamic key
-                            console.log("queryKey", queryKey);
+                            const queryKey = $el.data('q'); 
                             return {
-                                [queryKey]: params.term, // Use square brackets for dynamic key
+                                [queryKey]: params.term, 
                                 page: params.page || 1
                             };
                         },
                         processResults: function (data, params) {
                             params.page = params.page || 1;
                             const queryText = $el.data('text');
-                            console.log("queryText", queryText);
                             return {
                                 results: data.data.map(item => ({
                                     id: item.id,
-                                    // text: item.name || item.email || item.title
                                     text: item[queryText]
                                 })),
                                 pagination: {
@@ -143,9 +140,6 @@
                 });
             }
         });
-        // $('select2-field').select2({
-        //     theme: 'bootstrap4',
-        // });
     });
 </script>
 

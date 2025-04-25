@@ -20,14 +20,14 @@ class CreateProjectView(View):
         # Dynamically set the queryset for form fields
 
         if 'task_list' in request.POST:
+            print("####Task List Data:", request.POST.getlist('task_list'))
             tasks_ids = request.POST.getlist('task_list')  # Get multiple task IDs
             form.fields['task_list'].queryset = Task.objects.filter(id__in=tasks_ids)
         
         
         print(form.fields)
         if form.is_valid():
-            task = form.save(commit=False)
-            task.save()
+            form.save(commit=True)
             messages.success(request, 'Project created successfully.')
             return redirect('create_project')
         else:

@@ -27,6 +27,8 @@ class Task(models.Model):
     project = models.ForeignKey(
         Project,
         on_delete=models.CASCADE,
+        null=True,
+        blank=True,
         related_name='tasks'
     )
     

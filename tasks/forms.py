@@ -18,7 +18,7 @@ class TaskForm(forms.ModelForm):
 
     assigned_to = forms.ModelChoiceField(
         queryset=CustomUser.objects.none(),  # Replace with your CustomUser model's queryset
-        required=True,
+        required=False,
         widget=forms.Select(attrs={
             'class': 'form-control select2-field',
             "data-api-url": "/api/user-list/",
@@ -29,7 +29,7 @@ class TaskForm(forms.ModelForm):
  
     project = forms.ModelChoiceField(
         queryset=Project.objects.none(),  # Replace with your Project model's queryset
-        required=True,
+        required=False,
         widget=forms.Select(attrs={
             'class': 'form-control select2-field',
             "data-api-url": "/api/project-list/",

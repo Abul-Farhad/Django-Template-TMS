@@ -1,9 +1,10 @@
+import json
 from django import forms
 from projects.models import Project
 from tasks.models import Task
 
 class ProjectForm(forms.ModelForm):
-
+    
     title = forms.CharField(
         max_length=255,
         required=True,
@@ -34,14 +35,35 @@ class ProjectForm(forms.ModelForm):
     task_list = forms.ModelMultipleChoiceField(
         queryset = Task.objects.none(),
         required=False,
-        widget = forms.SelectMultiple(attrs={
-            'class': 'form-control select2-field',
-            "data-api-url": "/api/task-list/",
-            "data-q": "title",
-            'data-text': 'title'    
-        })
+        widget = forms.SelectMultiple()
     )
 
     class Meta:
         model = Project
-        fields = ['title', 'description', 'status', 'priority', 'task_list', 'due_date']
+        fields = ['title', 'description', 'status', 'priority', 'due_date']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+        config = {
+            "apiUrl": "/api/task-list/",
+            "queryParam": "title",
+            "textField": "title",
+            "filters": {
+                "task_assigned_to_project": False  # False means tasks with no project and True means tasks with project
+            }
+        }
+
+        self.fields['task_list'].widget.attrs.update({
+            'class': 'form-control select2-field',
+            'data-config': json.dumps(config)
+        })
+
+
+    def save(self, commit = ...):
+        task_list = self.cleaned_data.pop('task_list')
+        project = super().save(commit=commit)
+        if task_list:
+            Task.objects.filter(id__in=task_list).update(project=project)
+        
+        return project
